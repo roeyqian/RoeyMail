@@ -1,0 +1,35 @@
+name = "roey-mail"
+main = "src/index.js"
+compatibility_date = "2025-06-04"
+keep_vars = true
+
+[observability]
+enabled = true
+
+[[d1_databases]]
+binding = "db"
+database_name = "roey-mail-d1"
+database_id = "<YOUR_D1_DATABASE_ID>"
+
+[[kv_namespaces]]
+binding = "kv"
+id = "<YOUR_KV_NAMESPACE_ID>"
+
+[[r2_buckets]]
+binding = "r2"
+bucket_name = "roey-mail-r2"
+
+[assets]
+binding = "assets"
+directory = "./dist"
+not_found_handling = "single-page-application"
+run_worker_first = true
+
+[triggers]
+crons = ["0 16 * * *"]
+
+[vars]
+orm_log = false
+domain = ["example.com", "mail.example.com"]
+admin = "admin@example.com"
+jwt_secret = "<YOUR_JWT_SECRET_MIN_32_CHARS>"
