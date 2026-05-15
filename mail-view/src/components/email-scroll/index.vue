@@ -61,7 +61,7 @@
                       <Icon :icon="item.statusIcon.icon" :style="`color: ${item.statusIcon.color}`" width="20" height="20"/>
                     </el-tooltip>
                     <div class="del-status" v-if="item.isDel">
-                      <el-tooltip effect="dark" :content="item.isDelContent">
+                      <el-tooltip effect="dark" :content="t('selectDeleted')">
                         <Icon class="icon" icon="mdi:email-remove" width="20" height="20"/>
                       </el-tooltip>
                     </div>
@@ -357,6 +357,15 @@ onMounted(() => {
       email.formatCreateTime = fromNow(email.createTime);
     })
   }, 1000 * 60);
+})
+watch(() => settingStore.lang, () => {
+  const statusIconMap = getStatusIconMap()
+  emailList.forEach(email => {
+    email.formatCreateTime = fromNow(email.createTime)
+    if (email.status !== undefined) {
+      email.statusIcon = statusIconMap[email.status]
+    }
+  })
 })
 
 onUnmounted(() => {
@@ -703,7 +712,7 @@ function addItem(email) {
   }
 
   email.formatText = htmlToText(email);
-  email.formatCreateTime = fromNow(email.formatCreateTime);
+  email.formatCreateTime = fromNow(email.createTime);
 
   if (props.timeSort) {
     if (noLoading.value) {
@@ -841,29 +850,27 @@ function getEmailList(refresh = false) {
   })
 }
 
+function getStatusIconMap() {
+  return {
+    0: { icon: 'ic:round-mark-email-read', color: '#51C76B', content: t('received') },
+    1: { icon: 'bi:send-arrow-up-fill',  color: '#51C76B', content: t('sent') },
+    2: { icon: 'bi:send-check-fill',     color: '#51C76B', content: t('delivered') },
+    3: { icon: 'bi:send-x-fill',         color: '#F56C6C', content: t('bounced') },
+    8: { icon: 'bi:send-x-fill',         color: '#F56C6C', content: t('bounced') },
+    4: { icon: 'bi:send-exclamation-fill', color: '#FBBD08', content: t('complained') },
+    5: { icon: 'bi:send-arrow-up-fill',  color: '#FBBD08', content: t('delayed') },
+    7: { icon: 'ic:round-mark-email-read', color: '#FBBD08', content: t('noRecipient') },
+  };
+}
 function handleList(list) {
   list.forEach(email => {
     email.formatText = htmlToText(email)
     email.formatCreateTime = fromNow(email.createTime);
     email.test = t('received')
-    const statusIconMap = {
-      0: { icon: 'ic:round-mark-email-read', color: '#51C76B', content: t('received') },
-      1: { icon: 'bi:send-arrow-up-fill',  color: '#51C76B', content: t('sent') },
-      2: { icon: 'bi:send-check-fill',     color: '#51C76B', content: t('delivered') },
-      3: { icon: 'bi:send-x-fill',         color: '#F56C6C', content: t('bounced') },
-      8: { icon: 'bi:send-x-fill',         color: '#F56C6C', content: t('bounced') },
-      4: { icon: 'bi:send-exclamation-fill', color: '#FBBD08', content: t('complained') },
-      5: { icon: 'bi:send-arrow-up-fill',  color: '#FBBD08', content: t('delayed') },
-      7: { icon: 'ic:round-mark-email-read', color: '#FBBD08', content: t('noRecipient') },
-    };
-
-    if (email.isDel) {
-      email.isDelContent = t('selectDeleted');
-    }
+    const statusIconMap = getStatusIconMap()
     email.statusIcon = statusIconMap[email.status];
   })
 }
-
 function refresh() {
   emit('refresh-before')
   if (props.skeleton) {
